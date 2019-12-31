@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <title>笔记博客后台管理</title>
@@ -171,6 +171,12 @@
                             </dd>
                         </dl>
                     </li>
+                    <li data-name="user" class="layui-nav-item">
+                        <a lay-href="/management/file" lay-tips="文件管理" lay-direction="2">
+                            <i class="layui-icon layui-icon-file"></i>
+                            <cite>文件管理</cite>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -178,8 +184,8 @@
         <!-- 页面标签 -->
         <div class="layadmin-pagetabs" id="LAY_app_tabs">
             <div class="layui-icon layadmin-tabs-control layui-icon-prev" layadmin-event="leftPage"></div>
-            <div class="layui-icon layadmin-tabs-control layui-icon-next" layadmin-event="rightPage"></div>
-            <div class="layui-icon layadmin-tabs-control layui-icon-down">
+            <div class="layui-icon layadmin-tabs-control layui-icon-next" layadmin-event="rightPage" style="right: 0px"></div>
+            <div class="layui-icon layadmin-tabs-control" style="width: 0px">
                 <ul class="layui-nav layadmin-tabs-select" lay-filter="layadmin-pagetabs-nav">
                     <li class="layui-nav-item" lay-unselect>
                         <a href="javascript:;"></a>
@@ -198,7 +204,6 @@
                 </ul>
             </div>
         </div>
-
 
         <!-- 主体内容 -->
         <div class="layui-body" id="LAY_app_body">

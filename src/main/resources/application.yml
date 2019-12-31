@@ -38,3 +38,8 @@ mybatis-plus:
 server:
   tomcat:
     uri-encoding: UTF-8
+
+com:
+  zc:
+    savepath: /home/noteblogv5/file/
+#    savepath: D:\\file\\
