@@ -43,6 +43,12 @@
             <artifactId>jpinyin</artifactId>
             <version>1.1.8</version>
         </dependency>
+        <!-- 阿里提供的json工具包 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.61</version>
+        </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>

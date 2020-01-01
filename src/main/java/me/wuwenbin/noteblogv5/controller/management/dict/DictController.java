@@ -103,6 +103,22 @@ public class DictController extends BaseController {
         return ResultBean.ok("获取成功", cates);
     }
 
+    @GetMapping("/filesort/list")
+    @ResponseBody
+    public ResultBean fileSortList() {
+        List<Dict> dictList = dictService.findList(DictGroup.GROUP_FILESORT);
+        List<Map<String, Object>> fileSorts = new ArrayList<>(dictList.size());
+        for (Dict cate : dictList) {
+            Map<String, Object> c = new HashMap<>(4);
+            c.put("name", cate.getName());
+            c.put("value", cate.getName());
+            c.put("selected", "");
+            c.put("disabled", "");
+            fileSorts.add(c);
+        }
+        return ResultBean.ok("获取成功", fileSorts);
+    }
+
     @PostMapping("/tag/add")
     @ResponseBody
     public ResultBean addTag(String tagName) {

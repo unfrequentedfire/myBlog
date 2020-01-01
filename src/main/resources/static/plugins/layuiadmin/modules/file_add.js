@@ -1,7 +1,17 @@
-layui.use(["layer","form", "upload","jquery","element"],function() {
+layui.use(["layer","form", "upload","jquery","element","formSelects"],function() {
     var $=layui.jquery,
         upload = layui.upload,
+        formSelects = layui.formSelects,
+        form=layui.form;
         element = layui.element;
+
+    //查询文件分类有哪些
+    let fileSorts;
+    $.get("/management/dict/filesort/list", function (resp) {
+        if (resp.code === 200) {
+            fileSorts=resp.data
+        }
+    });
 
     //创建监听函数
     var xhrOnProgress=function(fun) {
@@ -21,6 +31,8 @@ layui.use(["layer","form", "upload","jquery","element"],function() {
         }
     };
 
+    let file_names="";
+    let file_indexs="";
     //多文件列表示例
     var demoListView = $('#demoList')
         ,uploadListIns = upload.render({
@@ -29,16 +41,40 @@ layui.use(["layer","form", "upload","jquery","element"],function() {
         ,accept: 'file'
         ,multiple: true
         ,auto: false
+        ,data:{param:{}}
         ,bindAction: '#testListAction'
         ,xhr:xhrOnProgress
+        ,before: function(obj){
+            let file_name_arr=file_names.split(",");
+            let file_index_arr=file_indexs.split(",");
+            let map=[];
+
+            for (let i in file_index_arr) {
+                if(i!=((file_index_arr.length)-1)){
+                    let file_nickname=$("#filenickname"+file_index_arr[i]).val();
+                    let file_sort=formSelects.value('filesortId'+file_index_arr[i], 'valStr');
+                    map.push({
+                        "file_name":file_name_arr[i],
+                        "file_nickname":file_nickname,
+                        "file_sort":file_sort
+                    })
+                }
+            }
+            this.data.param=JSON.stringify(map);
+        }
         ,choose: function(obj){
             var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
             //读取本地文件
             obj.preview(function(index, file, result){
                 var tr = $([
                     '<tr id="upload-'+ index +'">'+
-                        '<td>'+ file.name +'</td>'+
-                        '<td>'+ (file.size/1014).toFixed(1) +'kb</td>'+
+                        '<td><input type="text" class="layui-input" id="filenickname'+index+'" value="'+file.name+'"/></td>'+
+                        '<td>' +
+                            '<select name="filesortId'+index+'" xm-select="filesortId'+index+'" xm-select-search="" xm-select-radio>' +
+                                '<option value="">请选择文件分类</option>' +
+                            '</select>' +
+                        '</td>'+
+                        '<td>'+ ((file.size/1014)/1014).toFixed(1) +'MB</td>'+
                         '<td>' +
                             '<div class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="uploadProgressBar'+index+'">' +
                                 '<div class="layui-progress-bar" lay-percent="0%"></div>' +
@@ -62,9 +98,16 @@ layui.use(["layer","form", "upload","jquery","element"],function() {
                     tr.remove();
                     uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
                 });
+                file_names += file.name+",";
+                file_indexs += index+",";
 
                 demoListView.append(tr);
                 element.render('progress');//进度条div追加后，重新渲染进度条
+
+                formSelects.render('filesortId'+index);//重载formSelects
+                formSelects.data('filesortId'+index, 'local', {//给文件分类下拉赋值
+                    arr: fileSorts
+                });
             });
         }
         ,done: function(res, index, upload){

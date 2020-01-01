@@ -36,5 +36,14 @@ public class Filess implements Serializable {
     private String filesort;//文件分类
     @TableField("`post`")
     private Date post;
-
+    @TableField("`file_nickname`")
+    private String filenickname;
+    @TableField("`file_suffix`")
+    private String filesuffix;
+    @TableField("`createtime`")
+    private Date createtime;
+    @TableField("`creator`")
+    private String creator;
+    @TableField("`creatorid`")
+    private String creatorid;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <title>笔记博客后台管理</title>
@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="/static/plugins/layuiadmin/style/admin.css" media="all">
     <link rel="stylesheet" href="/static/assets/css/admin-nbv5.css" media="all">
+    <link rel="stylesheet" href="/static/plugins/layuiadmin/style/formSelects-v4.css" media="all">
+
 </head>
 <body>
 
@@ -38,7 +40,8 @@
         base: '/static/plugins/layuiadmin/' //静态资源所在路径
     }).extend({
         index: 'lib/index' //主入口模块
-    }).use(['index', 'file_add']);
+        , formSelects: 'formSelects-v4'
+    }).use(['index','formSelects', 'file_add']);
 </script>
 </body>
 </html>

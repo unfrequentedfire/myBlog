@@ -28,8 +28,8 @@ layui.define(["form", "table", "element"], function (exports) {
         }
         , cols: [[
             {type: 'numbers'}
-            , {field: 'filename', title: '文件名', sort: true}
-            , {field: 'filetype', title: '文件类型'}
+            , {field: 'filenickname', title: '文件名', sort: true}
+            , {field: 'filesuffix', title: '文件类型'}
             , {field: 'filesort', title: '文件分类'}
             , {field: 'post', title: '上传时间', sort: true, hide: true}
             , {title: '操作', width: 250, align: 'center', toolbar: '#fileBar', fixed: 'right'}
@@ -61,14 +61,13 @@ layui.define(["form", "table", "element"], function (exports) {
             window.top.layer.confirm('删除不可恢复，确认删除吗？', function (index) {
                 obj.del();
                 NBV5.post("/management/file/delete", {id: data.id});
-                layer.close(index);
+                window.top.layer.close(index);
             });
         }
 
         if (obj.event === 'down') {
             console.log(data.filename);
-            window.location.href="/management/file/download?fileName="+data.filename;
-            // NBV5.post("/management/file/download", {fileName: data.filename});
+            window.location.href="/management/file/download?fileName="+data.filename+"&fileNickName="+data.filenickname;
         }
         if (obj.event === 'detail') {
             alert("编辑");

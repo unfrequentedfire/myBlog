@@ -69,6 +69,12 @@ public class GlobalController {
                 CacheUtils.putIntoDefaultCache("cateGroupList", cateGroupList);
             }
 
+            List fileGroupList = CacheUtils.fetchFromDefaultCache("fileGroupList", List.class);
+            if (fileGroupList == null) {
+                fileGroupList = dictService.findList(DictGroup.GROUP_FILESORT);
+                CacheUtils.putIntoDefaultCache("fileGroupList", fileGroupList);
+            }
+
             Integer articleCount = CacheUtils.fetchFromDefaultCache("articleCount", Integer.class);
             if (articleCount == null) {
                 articleCount = articleService.count();
@@ -87,6 +93,7 @@ public class GlobalController {
                 CacheUtils.putIntoDefaultCache("commentCount", commentCount);
             }
             model.addAttribute("cateList", cateGroupList);
+            model.addAttribute("fileSortList", fileGroupList);
             model.addAttribute("blogCount", articleCount);
             model.addAttribute("blogWords", articleWords);
             model.addAttribute("runningDays", paramService.calcRunningDays());

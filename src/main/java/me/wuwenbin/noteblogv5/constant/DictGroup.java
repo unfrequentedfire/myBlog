@@ -9,4 +9,5 @@ public interface DictGroup {
     String GROUP_TAG = "tag";
     String GROUP_KEYWORD = "keyword";
     String GROUP_LINK = "link";
+    String GROUP_FILESORT = "file";
 }

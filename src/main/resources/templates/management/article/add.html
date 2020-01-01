@@ -85,7 +85,7 @@
                     <label>
                         <select name="cateId" xm-select="cateId" xm-select-search="" xm-select-max="3">
                             <option value="">请选择分类，可多选</option>
-                            <option th:each="cate : ${cateList}"
+                            <option th:each="cate : ${fileSortList}"
                                     th:value="${cate.id}"
                                     th:text="${cate.name}"></option>
                         </select>
