@@ -21,6 +21,13 @@ layui.define(['form', 'formSelects', 'upload', 'element', 'inputTags', 'admin'],
         layer.alert("最多只能选择3个");
     });
 
+    inputTags.render({
+        elem: '#inputTags',
+        aldaBtn: false,
+        done: function (value) {
+        }
+    });
+
     $("#refreshCate").click(function () {
         $.get("/management/dict/cate/list", function (resp) {
             if (resp.code === 200) {
