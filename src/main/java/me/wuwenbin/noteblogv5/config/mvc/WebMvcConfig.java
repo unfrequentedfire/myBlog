@@ -56,6 +56,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(new InitFilter()).addPathPatterns("/**").excludePathPatterns(excludePaths);
         registry.addInterceptor(new SessionFilter()).addPathPatterns("/**").excludePathPatterns(excludePaths);
         registry.addInterceptor(new TokenFilter()).addPathPatterns("/token/**", "/**/token/**");
-        registry.addInterceptor(new AdminFilter()).addPathPatterns("/management/**");
+        registry.addInterceptor(new AdminFilter()).addPathPatterns("/management/**").excludePathPatterns("/management/file/download");
     }
 }

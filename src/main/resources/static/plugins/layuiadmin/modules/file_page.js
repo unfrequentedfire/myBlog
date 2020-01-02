@@ -66,7 +66,6 @@ layui.define(["form", "table", "element"], function (exports) {
         }
 
         if (obj.event === 'down') {
-            console.log(data.filename);
             window.location.href="/management/file/download?fileName="+data.filename+"&fileNickName="+data.filenickname;
         }
         if (obj.event === 'detail') {

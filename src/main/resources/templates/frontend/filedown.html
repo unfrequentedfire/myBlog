@@ -14,8 +14,16 @@
     <link rel="stylesheet" href="/static/plugins/pushbar/pushbar.css">
     <link rel="stylesheet" href="/static/assets/css/simple.css">
     <link rel="stylesheet" href="/static/assets/css/article.css">
-    <link rel="stylesheet" href="/static/plugins/editormd/css/editormd.preview.min.css">
-    <title th:text="${article.title}"></title>
+    <title>下载</title>
+    <style type="text/css">
+        .dl-item {
+            line-height: 45px;
+            cursor: pointer;
+        }
+        .layui-col-space20>* {
+            padding: 10px;
+        }
+    </style>
 </head>
 <body class="layui-anim layui-anim-fadein simple">
 <!--顶部导航栏-->
@@ -50,7 +58,7 @@
                     <i class="layui-icon layui-icon-user"></i>
                     <span>用户</span>
                 </a>
-                <a href="/dl" data-title="下载">
+                <a href="/dl" data-title="下载" class="active">
                     <i class="layui-icon layui-icon-chart"></i>
                     <span>下载</span>
                 </a>
@@ -69,8 +77,7 @@
     <blockquote class="layui-elem-quote">
         <span class="layui-breadcrumb">
             <a href="/">网站首页</a>
-            <a href="">[[${article.title}]]</a>
-            <a><cite>正文</cite></a>
+            <a href="/dl">下载</a>
         </span>
         <div class="clock layui-show-md-inline-block layui-show-lg-inline-block layui-hide-xs layui-hide-sm">
             <span class="clock-font">当前日期</span>：<span id="current-datetime"></span>
@@ -79,7 +86,7 @@
 </div>
 
 <!--内容文章正体-->
-<div id="main-body" class="layui-container" style="padding:0px">
+<div id="main-body" class="layui-container">
 
 </div>
 
@@ -88,12 +95,11 @@
 <div class="layui-fluid bottom-nav">
     <div class="layui-row bottom-logo">
         <div class="layui-col-md4 layui-col-md-offset4 text-center">
-            <img th:src="${settings.bottom_logo}" alt="笔记博客">
+            <img th:src="${settings.bottom_logo}">
         </div>
     </div>
     <hr style="background: rgba(230, 230, 230, 0.54);">
     <div class="layui-row layui-col-space30" style="padding-top: 20px;">
-
         <div class="layui-col-md4 cates">
             <p>分类</p>
             <span class="layui-badge-rim no-select" th:each="cate :${cateList}"><a
@@ -137,7 +143,6 @@
 
     </div>
 </div>
-
 <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
 <!--[if lt IE 9]>
 <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -150,52 +155,30 @@
 <script src="/static/assets/js/nbv5.js"></script>
 <script src="/static/plugins/hc-sticky/hc-sticky.min.js"></script>
 <script src="/static/plugins/pushbar/pushbar.js"></script>
-<script src="/static/plugins/editormd/lib/marked.min.js"></script>
-<script src="/static/plugins/editormd/lib/prettify.min.js"></script>
-<script src="/static/plugins/editormd/lib/raphael.min.js"></script>
-<script src="/static/plugins/editormd/lib/underscore.min.js"></script>
-<script src="/static/plugins/editormd/lib/flowchart.min.js"></script>
-<script src="/static/plugins/editormd/lib/jquery.flowchart.min.js"></script>
-<script src="/static/plugins/editormd/lib/sequence-diagram.min.js"></script>
-<script src="/static/plugins/editormd/editormd.min.js"></script>
-<script src="/static/assets/js/img/enlargeImg.js"></script>
 <script th:inline="javascript">
     $(function () {
         window.addEventListener("scroll", nbv5front.headerScroll());
         nbv5front.miniHeader("main-body");
-        nbv5front.miniTitle("main-body");
         new Pushbar({
             blur: true,
             overlay: true
         });
 
 
-        layui.use(['layer', 'element', 'article'], function () {
+        layui.use(['layer', 'element', 'filedown'], function () {
             var layer = layui.layer,
                 element = layui.element,
-                article = layui.article;
+                filedown = layui.filedown;
 
             var settings = [[${settings}]];
-            var articleObj = [[${article}]];
-            var author = [[${author}]];
-            var articlePageStyle = [[${settings.article_page_style}]];
-            var cateList = [[${cateList}]];
-            var tagList = [[${tagList}]];
-            var linkList = [[${linkList}]];
-            var randomArticles = [[${randomArticles}]];
             var nbv5su = [[${nbv5su}]];
-            var tags = [[${tags}]];
-            var comments = [[${comments}]];
+            var files = [[${files}]];
 
             nbv5front.miniHeaderNavBtn(layer);
 
             element.render();
 
-            if (articlePageStyle === '0' || articlePageStyle === '-1' || articlePageStyle === "1") {
-                article(settings, author, articleObj, cateList, tagList, linkList, randomArticles, nbv5su, tags, comments);
-            } else {
-                layer.msg('文章风格设置出错！');
-            }
+            filedown(settings, nbv5su, files);
         });
 
     });
