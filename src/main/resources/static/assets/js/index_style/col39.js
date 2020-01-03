@@ -207,7 +207,7 @@ function stickySideBar() {
     var nbv5Sticky = new hcSticky("#affix-side", {
         stickTo: '#main-body'
         , innerSticker: '#info-panel'
-        , queries: {980: {disable: true}}
+        // , queries: {980: {disable: true}}
         , top: 75
         , bottom: 15
     });

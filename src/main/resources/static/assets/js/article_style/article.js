@@ -390,10 +390,17 @@ function stickySideBar() {
     new hcSticky("#affix-side", {
         stickTo: '#main-body'
         , innerSticker: '#info-panel'
-        , queries: {980: {disable: true}}
+        // , queries: {980: {disable: true}}
         , top: 75
         , bottom: 15
     });
+    /*jQuery('#affix-side').theiaStickySidebar({
+        // Settings
+        additionalMarginTop: 30,
+        additionalMarginBottom:15,
+        containerSelector:'.animated',
+        defaultPosition:''
+    });*/
 }
 
 function resolveMd(article) {
