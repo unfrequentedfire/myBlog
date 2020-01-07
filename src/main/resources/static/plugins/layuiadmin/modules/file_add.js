@@ -2,7 +2,7 @@ layui.use(["layer","form", "upload","jquery","element","formSelects"],function()
     var $=layui.jquery,
         upload = layui.upload,
         formSelects = layui.formSelects,
-        form=layui.form;
+        form=layui.form,
         element = layui.element;
 
     //查询文件分类有哪些

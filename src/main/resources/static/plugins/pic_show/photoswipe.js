@@ -3772,35 +3772,32 @@ $(function () {
 
 	// 创建对象
 	var img = new Image();
-	$('.main-cnt').on('click', "img[isshow='true']",function() {
+	$('.layui-card-body').on('click', "img",function() {
 		let pswpElement = document.querySelectorAll('.pswp')[0];
-		let ssp_cnt_id = $(this).attr("ssp_cnt_id");
 
 		let items=[];
-
-		$("img").each(function () {
-			if($(this).attr("ssp_cnt_id")==ssp_cnt_id){
-				var img_url = $(this).attr("src");
-				img.src=img_url;
-				let width=600;
-				let height=400;
-				// 判断是否有缓存,计算图片宽，高
-				if(img.complete){
+		$(".layui-card-body img").each(function () {
+			var img_url = $(this).attr("src");
+			img.src=img_url;
+			let width=600;
+			let height=400;
+			// 判断是否有缓存,计算图片宽，高
+			if(img.complete){
+				width=img.width;
+				height=img.height;
+			}else{
+				// 加载完成执行
+				img.onload = function(){
 					width=img.width;
 					height=img.height;
-				}else{
-					// 加载完成执行
-					img.onload = function(){
-						width=img.width;
-						height=img.height;
-					}
 				}
-				items.push({
-					src:img_url,
-					w: width,
-					h: height
-				})
 			}
+
+			items.push({
+				src:img_url,
+				w: width,
+				h: height
+			})
 		});
 
 		//配置

@@ -12,6 +12,13 @@
     <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="/static/plugins/layuiadmin/style/admin.css" media="all">
     <link rel="stylesheet" href="/static/assets/css/admin-nbv5.css" media="all">
+    <script src="/static/plugins/jquery/jquery-2.1.4.min.js"></script>
+    <!--图片预览-->
+    <link rel="stylesheet" href="/static/plugins/pic_show/main.css">
+    <link rel="stylesheet" href="/static/plugins/pic_show/default-skin.css">
+    <!--图片预览-->
+    <script type="text/javascript" src="/static/plugins/pic_show/photoswipe-ui-default.js"></script>
+    <script type="text/javascript" src="/static/plugins/pic_show/photoswipe.js"></script>
 </head>
 <body>
 <div class="layui-fluid layui-anim layui-anim-upbit">
@@ -24,7 +31,7 @@
                         <p>点击上传，或将图片拖拽到此处</p>
                     </div>
                 </div>
-                <div class="layui-card-body">
+                <div class="layui-card-body" style="overflow:hidden;">
                 </div>
             </div>
         </div>
@@ -33,6 +40,7 @@
 
 <script src="/static/plugins/layui/layui.js"></script>
 <script src="/static/assets/js/noteblogv5.js"></script>
+<script src="/static/assets/js/pic/img.js"></script>
 <script>
     layui.config({
         base: '/static/plugins/layuiadmin/' //静态资源所在路径
