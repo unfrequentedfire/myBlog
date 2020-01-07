@@ -1,9 +1,4 @@
-/** Created By Wuwenbin https://wuwenbin.me
- * mail to wuwenbinwork@163.com
- * 欢迎加入我们，QQ群：697053454
- * if you use the code,  please do not delete the comment
- * 如果您使用了此代码，请勿删除此头部注释
- * */
+
 var isIE = NBV5.browser.versions.trident;
 if (isIE) {
     alert("请使用【Chrome（或Chrome内核）／FireFox／Safari】等现代浏览器访问以获得最佳体验！");
