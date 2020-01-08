@@ -197,13 +197,37 @@ function linkSplit(link, index) {
 
 function stickySideBar() {
     nbv5front.clearSticky();
-    new hcSticky("#affix-side", {
-        stickTo: '#main-body'
-        , innerSticker: '#info-panel'
-        // , queries: {980: {disable: true}}
-        , top: 75
-        , bottom: 15
-    });
+    var p = 0, t = 0;
+    var sticky;
+    $(window).scroll(function () {
+        p = $(this).scrollTop();
+        if (t < p) {
+            if (sticky != null) {
+                sticky.destroy();
+            }
+            sticky = new hcSticky("#affix-side", {
+                stickTo: '#main-body',
+                innerSticker: '#info-panel',
+                queries: {980: {disable: true}},
+                bottom: 15
+            });
+            //下滚
+        } else {
+            if (sticky != null) {
+                sticky.destroy();
+            }
+            sticky = new hcSticky("#affix-side", {
+                stickTo: '#main-body',
+                innerSticker: '#info-panel',
+                queries: {980: {disable: true}},
+                top: 75
+            });
+            //上滚
+        }
+        setTimeout(function () {
+            t = p;
+        }, 0)
+    })
 }
 
 function initPage(pageObj, page) {
