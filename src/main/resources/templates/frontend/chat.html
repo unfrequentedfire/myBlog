@@ -7,14 +7,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="shortcut icon" href="/static/assets/img/favicon.png">
     <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/plugins/msg/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/plugins/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="/static/plugins/animate/animate.min.css">
     <link rel="stylesheet" href="/static/assets/css/style.css">
     <link rel="stylesheet" href="/static/assets/css/layui-theme-nbv5.css">
     <link rel="stylesheet" href="/static/plugins/pushbar/pushbar.css">
     <link rel="stylesheet" href="/static/assets/css/simple.css">
-    <link rel="stylesheet" href="/static/assets/css/ubs.css">
-    <title th:text="${nbv5su!=null?nbv5su.nickname:''}+'用户中心'"></title>
+    <link rel="stylesheet" href="/static/assets/css/article.css">
+    <link rel="stylesheet" href="/static/plugins/msg/css/style.css" />
+    <style>
+        a {color: #333;}
+        .no-login {
+            position: relative;
+            width: 100%;
+            z-index: 999;
+            background: #000;
+            content: "";
+            opacity: 0.4;
+            text-align: center;
+            float: left;
+        }
+        .login-a {
+            color: beige;
+            display:inline-block;
+            width: 100%;
+            height: 100%;
+        }
+        .login-a:hover {
+            font-size:18px;
+            /*color: beige;*/
+        }
+    </style>
+    <title>用户留言</title>
 </head>
 <body class="layui-anim layui-anim-fadein simple">
 <!--顶部导航栏-->
@@ -45,7 +70,7 @@
                     <i class="layui-icon layui-icon-chat"></i>
                     <span th:text="${settings.menu_message}"></span>
                 </a>
-                <a href="/login?redirectUrl=/ubs/token/index" class="active" data-title="用户">
+                <a href="/login?redirectUrl=/ubs/token/index" data-title="用户">
                     <i class="layui-icon layui-icon-user"></i>
                     <span>用户</span>
                 </a>
@@ -53,7 +78,7 @@
                     <i class="layui-icon layui-icon-chart"></i>
                     <span>下载</span>
                 </a>
-                <a href="/chat" data-title="聊天室">
+                <a href="/chat" class="active" data-title="聊天室">
                     <i class="layui-icon layui-icon-dialogue"></i>
                     <span>聊天室</span>
                 </a>
@@ -70,9 +95,10 @@
 <!--顶部文字-->
 <div class="layui-container top-block">
     <blockquote class="layui-elem-quote">
-        <span class="layui-breadcrumb">
+        <span class="layui-breadcrumb" style="visibility: visible;">
             <a href="/">网站首页</a>
-            <a href="/ubs/token/message">我的消息</a>
+            <span lay-separator="">/</span>
+            <a href="/chat">聊天室</a>
         </span>
         <div class="clock layui-show-md-inline-block layui-show-lg-inline-block layui-hide-xs layui-hide-sm">
             <span class="clock-font">当前日期</span>：<span id="current-datetime"></span>
@@ -81,42 +107,13 @@
 </div>
 
 <!--内容文章正体-->
-<div id="main-body" class="layui-container layui-mt20" style="margin-bottom: 30px;">
-    <div class="layui-row layui-col-space20">
-        <div class="layui-col-md2 layui-hide-sm layui-hide-xs layui-show-md-inline-block left-nav">
-            <ul class="layui-nav layui-nav-tree" lay-filter="test">
-                <li class="layui-nav-item">
-                    <a href="/login?redirectUrl=/ubs/token/index"><i class="fa fa-user-secret"></i> 用户中心</a>
-                </li>
-                <li class="layui-nav-item layui-nav-itemed">
-                    <a href="/ubs/token/message" class="layui-this"><i class="fa fa-envelope"></i> 我的消息</a>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="/ubs/token/comment"><i class="fa fa-comment"></i> 我的评论</a>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="/ubs/token/purchase"><i class="fa fa-shopping-cart"></i> 我的购买</a>
-                </li>
-            </ul>
+<div id="main-body" class="layui-container">
 
-        </div>
-        <div class="layui-col-md10 right-nav animated fadeInUp">
-            <div class="layui-card">
-                <div class="layui-card-body" style="padding: 30px;">
-
-                    <hr class="layui-mt20">
-                    <div class="layui-row layui-mt20">
-                        <div id="reply-table" class="layui-table"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 
 <!--底部导航栏-->
-<div class="layui-fluid bottom-nav">
+<div class="layui-fluid bottom-nav" style="position: absolute;width: 100%;">
     <div class="layui-row bottom-logo">
         <div class="layui-col-md4 layui-col-md-offset4 text-center">
             <img th:src="${settings.bottom_logo}" alt="笔记博客">
@@ -148,12 +145,15 @@
                    class="layui-btn layui-btn-sm layui-btn-primary">登录</a>
                 <span th:if="${nbv5su !=null}" class="layui-mr15">
                     <img th:src="${nbv5su.avatar}" class="layui-circle" style="width: 30px;"/>
-                    <a th:text="${nbv5su.nickname}" class="layui-text layui-word-aux"  href="/ubs/token/message"></a>
+                    <a th:text="${nbv5su.nickname}" class="layui-text layui-word-aux" href="/login?redirectUrl=/ubs/token/index"></a>
                 </span> <a onclick="nbv5front.tokenLogout();" class="layui-btn layui-btn-sm layui-btn-primary">退出</a>
             </p>
         </div>
     </div>
 </div>
+<input th:if="${nbv5su !=null}" type="hidden" id="userid" th:value="${nbv5su.id}"/>
+<input th:if="${nbv5su !=null}" type="hidden" id="username" th:value="${nbv5su.nickname}"/>
+<input type="hidden" id="sendUserid" />
 
 <!--移动设备菜单导航-->
 <div data-pushbar-id="bottomNav" class="pushbar from_bottom">
@@ -166,6 +166,7 @@
             <a href="/note" th:text="${settings.menu_note}"></a>
             <a href="/message" th:text="${settings.menu_message}"></a>
             <a href="/login?redirectUrl=/ubs/token/index">用户</a>
+            <a href="/dl">下载</a>
             <a href="/s/w">搜索</a>
         </p>
 
@@ -178,11 +179,14 @@
 <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
 <![endif]-->
 <script src="/static/plugins/layui/layui.js"></script>
+<!--<script src="http://cdn.bootstrapmb.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>-->
 <script src="/static/assets/js/svg.js"></script>
 <script src="/static/plugins/jquery/jquery-2.1.4.min.js"></script>
 <script src="/static/assets/js/script.js"></script>
 <script src="/static/assets/js/nbv5.js"></script>
+<!--JQ固定元素-->
 <script src="/static/plugins/hc-sticky/hc-sticky.min.js"></script>
+<!--移动端下拉-->
 <script src="/static/plugins/pushbar/pushbar.js"></script>
 <script th:inline="javascript">
     $(function () {
@@ -194,45 +198,44 @@
         });
 
 
-        layui.use(['layer', 'element', 'table'], function () {
+        layui.use(['layer', 'element', 'chat'], function () {
             var layer = layui.layer,
                 element = layui.element,
-                table = layui.table;
-            element.render();
+                chat = layui.chat;
 
+            var settings = [[${settings}]];
+            var linkList = [[${linkList}]];
             var nbv5su = [[${nbv5su}]];
 
             nbv5front.miniHeaderNavBtn(layer);
 
-            table.render({
-                elem: '#reply-table'
-                , url: '/ubs/token/reply/' + nbv5su.id
-                , page: true
-                , limit: 10
-                , height: 'full'
-                , method: 'post'
-                , request: {
-                    pageName: 'current' //页码的参数名称，默认：page
-                    , limitName: 'size' //每页数据量的参数名，默认：limit
-                }
-                , cols: [
-                    [
-                        {field: 'userDesc', title: '发送人'}
-                        , {field: 'floorId', title: '楼层', width: 80}
-                        , {
-                        field: 'articleId', title: '文章', templet: function (d) {
-                            return '<a href="/article/' + d.articleId + '" target="_blank" style="color: #f6695e;">' + d.title + '</a>';
-                        }
-                    }
-                        , {field: 'replyContent', minWidth: 250, title: '评论内容', event: 'detail'}
-                        , {field: 'replyTime', title: '发布时间', sort: true}
-                    ]
-                ]
-            });
+            element.render();
 
+            chat(settings, linkList, nbv5su);
         });
 
     });
 </script>
+<!--<script>
+    const chatAppTarget = $('.chat-window');
+    (function() {
+        if ($(window).width() > 991)
+            chatAppTarget.removeClass('chat-slide');
+
+        $(document).on("click",".chat-window .chat-users-list a.media",function () {
+            if ($(window).width() <= 991) {
+                chatAppTarget.addClass('chat-slide');
+            }
+            return false;
+        });
+        $(document).on("click","#back_user_list",function () {
+            if ($(window).width() <= 991) {
+                chatAppTarget.removeClass('chat-slide');
+            }
+            return false;
+        });
+
+    })();
+</script>-->
 </body>
 </html>
