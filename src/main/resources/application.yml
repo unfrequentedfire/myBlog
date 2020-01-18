@@ -41,5 +41,5 @@ server:
 
 com:
   zc:
-#    savepath: /home/noteblogv5/file/
-    savepath: D:\\file\\
+    savepath: /home/noteblogv5/file/
+#    savepath: D:\\file\\
