@@ -117,7 +117,20 @@ function webSocketSession(){
 
         //维护在线用户列表
         if(data.type=='user_status'){
-            $("#userlist").empty();
+            let htm =
+                '<a href="javascript:void(0);" class="media active" name="user" is-public="true">' +
+                    '<div class="media-img-wrap">' +
+                        '<div class="avatar avatar-online">' +
+                            '<img src="../../assets/img/avatar_public.jpg" class="avatar-img rounded-circle">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="media-body">' +
+                        '<div>' +
+                            '<div class="user-name">群聊</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</a>';
+            $("#userlist").html(htm);
             for (let obj of data.user_info) {
                 if(obj.is_online=='0'){
                     let htm =
@@ -229,10 +242,17 @@ function webSocketSession(){
         }
     });
 
-    //私聊
+    //人员列表点击
     $("#userlist").on('click','a[name="user"]',function () {
         if($(this).attr("userid")==$("#userid").val()){
             alert("不能给自己发消息");
+            return;
+        }
+
+        $("a[name='user']").removeClass("active");
+        $(this).addClass("active");
+        if($(this).attr("is-public")=='true'){//群聊
+            $("#sendUserid").val('');
             return;
         }
 
@@ -245,9 +265,6 @@ function webSocketSession(){
                                         '<div class="user-name">'+$(this).attr('username')+'</div>' +
                                         '<div class="user-status">在线</div>' +
                                     '</div>');
-
-        $("a[name='user']").removeClass("active");
-        $(this).addClass("active");
         $("#sendUserid").val($(this).attr("userid"));
     })
 }
