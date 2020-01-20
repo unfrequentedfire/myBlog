@@ -1,7 +1,5 @@
 layui.define(['laytpl', 'timeago', 'laypage','jquery'], function (exports) {
     var tpl = layui.laytpl,
-        timeago = layui.timeago,
-        laypage = layui.laypage,
         $=layui.jquery;
 
     let _tpl =
