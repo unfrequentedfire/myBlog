@@ -36,6 +36,17 @@ public class WebSocketServer {
     public void init() {
         server = this;
         server.userService = this.userService;
+
+        //获取所有用户信息
+        List<User> list=server.userService.list();
+        for(User user:list){
+            HashMap<String,Object> map=new HashMap<>();
+            map.put("username",user.getNickname());
+            map.put("userid",user.getId());
+            map.put("avatar",user.getAvatar());
+
+            users.add(map);
+        }
     }
 
     public void setUserService(UserService userService) {
@@ -72,21 +83,6 @@ public class WebSocketServer {
     public void onOpen( @PathParam(value = "id") String id, @PathParam(value = "xm") String xm, Session session) {
         onlineSessions.put(id, session);
         System.out.println("用户 "+id+" 上线！当前在线 "+onlineSessions.size()+" 人");
-
-        flag: {
-            for(HashMap map1:users){
-                if(id.equals(map1.get("userid"))){
-                    break flag;
-                }
-            }
-
-            User user=server.userService.getById(id);
-            HashMap<String,Object> map=new HashMap<>();
-            map.put("username",xm);
-            map.put("userid",id);
-            map.put("avatar",user.getAvatar());
-            users.add(map);
-        }
     }
 
     @OnMessage
@@ -99,7 +95,7 @@ public class WebSocketServer {
         if("connect-success".equals(msg)){
             map.put("type","init");
             for(HashMap map1:users){
-                if(onlineSessions.get(map1.get("userid"))!=null){
+                if(onlineSessions.get(map1.get("userid").toString())!=null){
                     //在线
                     map1.put("is_online",'0');
                 }else {
