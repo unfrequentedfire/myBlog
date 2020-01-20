@@ -45,7 +45,7 @@ layui.define(['laytpl', 'timeago', 'laypage','jquery'], function (exports) {
                                 '</div>' +
                             '</div>' +
                             '<div class="chat-body">' +
-                                '<div class="chat-scroll">' +
+                                '<div class="chat-scroll" id="message-div">' +
                                     '<ul class="list-unstyled" id="messageList">' +
                                         // '<li class="chat-date">Today</li>' +
 
@@ -100,113 +100,39 @@ layui.define(['laytpl', 'timeago', 'laypage','jquery'], function (exports) {
 
 });
 
+var mydate = new Date();//时间对象，用于显示时间
 function webSocketSession(){
-    var mydate = new Date();//时间对象，用于显示时间
     var userid = $("#userid").val();
     var username = $("#username").val();
     var websocket = new WebSocket("wss://coolfire.store/websocket/"+userid+"/"+username);
+    // var websocket = new WebSocket("ws://localhost:443/websocket/"+userid+"/"+username);
 
     websocket.onopen = function (evnt) {
         console.log('连接成功！');
         websocket.send("connect-success");
+
+        //默认点击群聊
+        setTimeout(function () {
+            $("a[is-public='true']").click();
+        },1000);
+
+        heartCheck.start();//启动心跳
     };
 
     websocket.onmessage = function (evnt) {
+        heartCheck.reset();//心跳重置
         let result=JSON.parse(evnt.data);
         let data=result.data;
 
         //维护在线用户列表
-        if(data.type=='user_status'){
-            let htm =
-                '<a href="javascript:void(0);" class="media active" name="user" is-public="true">' +
-                    '<div class="media-img-wrap">' +
-                        '<div class="avatar avatar-online">' +
-                            '<img src="../../assets/img/avatar_public.jpg" class="avatar-img rounded-circle">' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="media-body">' +
-                        '<div>' +
-                            '<div class="user-name">群聊</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</a>';
-            $("#userlist").html(htm);
-            for (let obj of data.user_info) {
-                if(obj.is_online=='0'){
-                    let htm =
-                        '<a href="javascript:void(0);" class="media" name="user" username="'+obj.username+'" userid="'+obj.userid+'">' +
-                            '<div class="media-img-wrap">' +
-                                '<div class="avatar avatar-online">' +
-                                    '<img src="'+obj.avatar+'" class="avatar-img rounded-circle">' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="media-body">' +
-                                '<div>' +
-                                    '<div class="user-name">'+obj.username+'</div>' +
-                                '</div>' +
-                            '</div>' +
-                        '</a>';
-                    $("#userlist").append(htm);
-                }
-            }
+        if(data.type=='init'){
+            chatRoomInit(data);
         }else if(data.type=='msg'){//维护消息发送模块
-            let username=data.username;
-            let message=data.message;
-            let avatar=data.avatar;
-
-            let htm='';
-            if(username==$("#username").val()) {
-                //消息来自自己，改变样式
-                htm='<li class="media sent">' +
-                        '<div class="media-body">' +
-                            '<div class="msg-box">' +
-                                '<div>' +
-                                    '<p>'+message+'</p>' +
-                                    '<div class="chat-msg-actions dropdown">' +
-                                        '<a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                                            '<i class="fe fe-elipsis-v"></i>' +
-                                        '</a>' +
-                                        '<div class="dropdown-menu dropdown-menu-right">' +
-                                            '<a class="dropdown-item" href="#">Delete</a>' +
-                                        '</div>' +
-                                    '</div>' +
-                                    '<ul class="chat-msg-info">' +
-                                        '<li>' +
-                                            '<div class="chat-time">' +
-                                                '<span>'+mydate.toLocaleString()+'</span>' +
-                                            '</div>' +
-                                        '</li>' +
-                                        '<li><a href="#">Edit</a></li>' +
-                                    '</ul>' +
-                            '</div>' +
-                            '</div>' +
-                        '</div>' +
-                    '</li>';
-                $("#messageList").append(htm);
-                return;
-            }
-
-            htm='<li class="media received">' +
-                    '<div class="avatar">' +
-                        '<img src="'+avatar+'" alt="User Image" class="avatar-img rounded-circle">' +
-                    '</div>' +
-                    '<div class="media-body">' +
-                        '<div class="msg-box">' +
-                            '<div>' +
-                                '<p>'+message+'</p>' +
-                                '<ul class="chat-msg-info">' +
-                                    '<li>' +
-                                        '<div class="chat-time">' +
-                                            '<span>'+mydate.toLocaleString()+'</span>' +
-                                        '</div>' +
-                                    '</li>' +
-                                    '<li><a href="#">--'+username+'</a></li>' +
-                                '</ul>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</li>';
-            $("#messageList").append(htm);
+            setSendMess(data);
+        }else if(data.type=='public-message'){//维护群聊历史消息
+            setPublicMess(data);
+        }else if(data.type=='private-message'){//维护私聊历史消息
+            setPrivateMess(data);
         }
     };
 
@@ -216,6 +142,26 @@ function webSocketSession(){
     };
     websocket.onclose = function (evnt) {
         console.log('连接关闭！');
+    };
+
+    /**
+     * 心跳数据代码
+     * @type {{timeoutObj: null, start: heartCheck.start, reset: heartCheck.reset, timeout: number}}
+     */
+    var heartCheck = {
+        timeout: 60000,//60s
+        timeoutObj: null,
+        reset: function(){
+            clearInterval(this.timeoutObj);
+            this.start();
+        },
+        start: function(){
+            this.timeoutObj = setInterval(function(){
+                if(websocket.readyState==1){
+                    websocket.send("HeartBeat");
+                }
+            }, this.timeout)
+        }
     };
 
     $("#sendMessage").bind("click", function() {
@@ -249,22 +195,264 @@ function webSocketSession(){
             return;
         }
 
+        //清空消息
+        $("#messageList").empty();
+        //清空提醒未读数量
+        $(this).find(".media-active").empty();
+        $(this).find(".media-active").attr("active-num","0");
         $("a[name='user']").removeClass("active");
         $(this).addClass("active");
-        if($(this).attr("is-public")=='true'){//群聊
-            $("#sendUserid").val('');
-            return;
-        }
-
         $("#chatHeader").html('<div class="media-img-wrap">' +
                                     '<div class="avatar avatar-online">' +
                                         '<img src="'+$(this).find("img").attr("src")+'" alt="User Image" class="avatar-img rounded-circle">' +
                                     '</div>' +
                                 '</div>' +
-                                    '<div class="media-body">' +
-                                        '<div class="user-name">'+$(this).attr('username')+'</div>' +
-                                        '<div class="user-status">在线</div>' +
-                                    '</div>');
-        $("#sendUserid").val($(this).attr("userid"));
+                                '<div class="media-body">' +
+                                    '<div class="user-name">'+$(this).find("div[class='user-name']").html()+'</div>' +
+                                    '<div class="user-status">在线</div>' +
+                                '</div>');
+        //群聊
+        if($(this).attr("is-public")=='true'){
+            $("#sendUserid").val('');
+            websocket.send("get-public-message");
+        }else {//私聊
+            $("#sendUserid").val($(this).attr("userid"));
+            websocket.send("get-private-message:"+$(this).attr("userid"));
+        }
     })
+}
+
+/**
+ * 聊天室初始化-在线人员列表
+ * @param data
+ */
+function chatRoomInit(data) {
+    let htm =
+        '<a href="javascript:void(0);" class="media active" name="user" is-public="true">' +
+            '<div class="media-img-wrap">' +
+                '<div class="avatar avatar-online">' +
+                    '<img src="../../assets/img/avatar_public.jpg" class="avatar-img rounded-circle">' +
+                '</div>' +
+            '</div>' +
+            '<div class="media-body">' +
+                '<div>' +
+                    '<div class="user-name">群聊</div>' +
+                '</div>' +
+            '</div>' +
+        '</a>';
+    $("#userlist").html(htm);
+    for (let obj of data.user_info) {
+        if(obj.is_online=='0'){
+            let htm =
+                '<a href="javascript:void(0);" class="media" name="user" username="'+obj.username+'" userid="'+obj.userid+'">' +
+                    '<div class="media-img-wrap">' +
+                        '<div class="avatar avatar-online">' +
+                            '<img src="'+obj.avatar+'" class="avatar-img rounded-circle">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="media-body">' +
+                        '<div>' +
+                            '<div class="user-name">'+obj.username+'</div>' +
+                        '</div>' +
+                        '<div class="media-active" active-num="0"></div>'+
+                    '</div>' +
+                '</a>';
+            $("#userlist").append(htm);
+        }
+    }
+}
+
+/**
+ * 设置群聊历史
+ */
+function setPublicMess(data) {
+    for (let obj of data.public_msg) {
+        if(obj.username==$("#username").val()) {
+            //消息来自自己，改变样式
+            let htm=
+                '<li class="media sent">' +
+                    '<div class="media-body">' +
+                        '<div class="msg-box">' +
+                            '<div>' +
+                                '<p>'+obj.message+'</p>' +
+                                '<div class="chat-msg-actions dropdown">' +
+                                    '<a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                        '<i class="fe fe-elipsis-v"></i>' +
+                                    '</a>' +
+                                    '<div class="dropdown-menu dropdown-menu-right">' +
+                                        '<a class="dropdown-item" href="#">Delete</a>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<ul class="chat-msg-info">' +
+                                    '<li>' +
+                                        '<div class="chat-time">' +
+                                            '<span>'+mydate.toLocaleString()+'</span>' +
+                                        '</div>' +
+                                    '</li>' +
+                                    '<li><a href="#">Edit</a></li>' +
+                                '</ul>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</li>';
+            $("#messageList").append(htm);
+        }else {
+            let htm =
+                '<li class="media received">' +
+                    '<div class="avatar">' +
+                        '<img src="' + obj.avatar + '" alt="User Image" class="avatar-img rounded-circle">' +
+                    '</div>' +
+                    '<div class="media-body">' +
+                        '<div class="msg-box">' +
+                            '<div>' +
+                                '<p>' + obj.message + '</p>' +
+                                '<ul class="chat-msg-info">' +
+                                    '<li><div class="chat-time"><span>' + mydate.toLocaleString() + '</span></div></li>' +
+                                    '<li><a href="#">--' + obj.username + '</a></li>' +
+                                '</ul>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</li>';
+            $("#messageList").append(htm);
+        }
+    }
+
+    scrollBottm();
+}
+
+/**
+ * 设置消息发送
+ */
+function setSendMess(data) {
+    let username=data.username;
+    let message=data.message;
+    let avatar=data.avatar;
+    let userid=data.userid;
+
+    if(username==$("#username").val()) {
+        //消息来自自己，改变样式
+        let htm=
+            '<li class="media sent">' +
+                '<div class="media-body">' +
+                    '<div class="msg-box">' +
+                        '<div>' +
+                            '<p>'+message+'</p>' +
+                            '<div class="chat-msg-actions dropdown">' +
+                                '<a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                    '<i class="fe fe-elipsis-v"></i>' +
+                                '</a>' +
+                                '<div class="dropdown-menu dropdown-menu-right">' +
+                                    '<a class="dropdown-item" href="#">Delete</a>' +
+                                '</div>' +
+                            '</div>' +
+                            '<ul class="chat-msg-info">' +
+                                '<li>' +
+                                    '<div class="chat-time">' +
+                                        '<span>'+mydate.toLocaleString()+'</span>' +
+                                    '</div>' +
+                                '</li>' +
+                                '<li><a href="#">Edit</a></li>' +
+                            '</ul>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</li>';
+        $("#messageList").append(htm);
+    }else if($("a[userid='"+userid+"']").attr("class").indexOf("active")>=0){
+        //消息来自别人，并且对话框已打开
+        let htm =
+            '<li class="media received">' +
+                '<div class="avatar">' +
+                    '<img src="' + avatar + '" alt="User Image" class="avatar-img rounded-circle">' +
+                '</div>' +
+                '<div class="media-body">' +
+                    '<div class="msg-box">' +
+                        '<div>' +
+                            '<p>' + message + '</p>' +
+                            '<ul class="chat-msg-info">' +
+                                '<li>' +
+                                    '<div class="chat-time">' +
+                                        '<span>' + mydate.toLocaleString() + '</span>' +
+                                    '</div>' +
+                                '</li>' +
+                                '<li><a href="#">--' + username + '</a></li>' +
+                            '</ul>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</li>';
+        $("#messageList").append(htm);
+    }else {
+        //消息来自别人，对话框未开启，添加提醒
+        $("a[userid='"+userid+"']").find(".media-active").each(function () {
+            let num=parseInt($(this).attr("active-num"));
+            $(this).attr("active-num",(num+1));
+
+            let htm = '<div class="badge badge-success badge-pill">'+$(this).attr("active-num")+'</div>';
+            $(this).html(htm);
+        });
+    }
+
+    scrollBottm();
+}
+
+function setPrivateMess(data) {
+    for (let obj of data.private_msg) {
+        if(obj.username==$("#username").val()) {
+            //消息来自自己，改变样式
+            let htm=
+                '<li class="media sent">' +
+                    '<div class="media-body">' +
+                        '<div class="msg-box">' +
+                            '<div>' +
+                                '<p>'+obj.message+'</p>' +
+                                '<div class="chat-msg-actions dropdown">' +
+                                    '<a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                                        '<i class="fe fe-elipsis-v"></i>' +
+                                    '</a>' +
+                                    '<div class="dropdown-menu dropdown-menu-right">' +
+                                        '<a class="dropdown-item" href="#">Delete</a>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<ul class="chat-msg-info">' +
+                                    '<li>' +
+                                        '<div class="chat-time">' +
+                                            '<span>'+mydate.toLocaleString()+'</span>' +
+                                        '</div>' +
+                                    '</li>' +
+                                    '<li><a href="#">Edit</a></li>' +
+                                '</ul>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</li>';
+            $("#messageList").append(htm);
+        }else {
+            let htm =
+                '<li class="media received">' +
+                    '<div class="avatar">' +
+                        '<img src="' + obj.avatar + '" alt="User Image" class="avatar-img rounded-circle">' +
+                    '</div>' +
+                    '<div class="media-body">' +
+                        '<div class="msg-box">' +
+                            '<div>' +
+                                '<p>' + obj.message + '</p>' +
+                                '<ul class="chat-msg-info">' +
+                                    '<li><div class="chat-time"><span>' + mydate.toLocaleString() + '</span></div></li>' +
+                                    '<li><a href="#">--' + obj.username + '</a></li>' +
+                                '</ul>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</li>';
+            $("#messageList").append(htm);
+        }
+    }
+
+    scrollBottm();
+}
+
+function scrollBottm() {
+    $("#message-div").scrollTop($("#message-div")[0].scrollHeight);
 }
